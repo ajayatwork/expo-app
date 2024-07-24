@@ -1,9 +1,9 @@
-import axios from "axios";
-
-export async function login(userData){
-    const res = await axios.post({
-      username: userData.email,
-      password: userData.password,
-    });
-    return res;
+import {request} from '../utils/index'
+export const loginToApi = async(userData)=>{
+  const response = await request({
+    path: "auth/login",
+    method: "POST",
+    body: {username: userData.email, password: userData.password}
+  })
+  return response;
 }
