@@ -1,25 +1,19 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
+import { router, Stack, useRootNavigationState } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { ToastProvider } from 'react-native-toast-notifications'
 import "react-native-reanimated";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRootNavigationState, Redirect } from 'expo-router';
-
+import { Slot } from 'expo-router';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [userToken, setUserToken] = useState<null | string>(null);
+   const rootNavigation = useRootNavigationState();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const rootNavigationState = useRootNavigationState();
+  const [isAppReady, setisAppReady] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -29,11 +23,12 @@ export default function RootLayout() {
       try {
         // Simulate a delay for the splash screen
         await new Promise((resolve) => setTimeout(resolve, 2000));
-      } catch (e) {
-        console.warn(e);
-      } finally {
-
+        setIsLoggedIn(true);
+        setisAppReady(true);
         await SplashScreen.hideAsync();
+
+      }finally {
+
       }
     }
 
@@ -48,7 +43,7 @@ export default function RootLayout() {
           console.log("Data2143", data);
           setIsLoggedIn(true);
           setUserToken(data);
-          <Redirect href={'/(home)'}/>
+          router.replace("/(home)")
         }
       } catch (error) {
         console.error("Failed to fetch the token from AsyncStorage", error);
@@ -56,19 +51,17 @@ export default function RootLayout() {
     };
 
     checkUserLoggedIn();
-  }, []);
 
-  if (!loaded && !rootNavigationState?.key) {
-    return null;
+  }, [isAppReady, isLoggedIn]);
+
+  if (!rootNavigation.key) {
+    return <Slot />;
   }
   return (
       <ToastProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
-          <Stack.Screen name="(home)" options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        )}
+        {isLoggedIn ?   <Stack.Screen name="(home)" options={{ headerShown: false }} />
+         : <Stack.Screen name="(auth)" options={{ headerShown: false }} />}
         <Stack.Screen name="+not-found" />
       </Stack>
       </ToastProvider>
