@@ -27,7 +27,7 @@ const ResetPasswordScreen = () => {
     const res = await resetPassword(userData.password, email);
     if(res?.status){
       showsuccesToast(res?.data?.message);
-      router.replace("/");
+      router.replace("/(auth)");
     }
   } catch (error) {
     catchError(error?.response.data.message);
