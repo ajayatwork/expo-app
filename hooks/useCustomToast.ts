@@ -6,7 +6,7 @@ export const useCustomToast = () => {
   const catchError = (message: string) => {
     message!= "" && toast.show(message, {
       type: "danger",
-      placement: "bottom",
+      placement: "top",
       duration: 3500,
       animationType: "slide-in",
     });
@@ -15,7 +15,7 @@ export const useCustomToast = () => {
   const showsuccesToast = (message:string)=>{
     message!= "" &&  toast.show(message, {
       type: "success",
-      placement: "bottom",
+      placement: "top",
       duration: 3500,
       animationType: "slide-in",
     })

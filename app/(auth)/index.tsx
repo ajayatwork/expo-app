@@ -6,6 +6,8 @@ import {
   TextInputChangeEventData,
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, {useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,6 +21,7 @@ type LoginCreds = {
   email: string | undefined;
   password: string | undefined;
 };
+import axios from 'axios'
 
 const login = () => {
   const router = useRouter();
@@ -48,13 +51,15 @@ const login = () => {
       router.replace("/(home)");
       await AsyncStorage.setItem("token", res?.data?.data?.token)
     } catch (error) {
-      catchError(error?.response.data.errors)
+      if (axios.isAxiosError(error)) {
+      catchError(error.response?.data?.message);
+    } 
     }finally{
       setisLoading(false);
     }
   }
   return (
-    <View style={Styles.container}>
+    <KeyboardAvoidingView style={Styles.container}>
       <Text style={Styles.text}>Login</Text>
       <View style={Styles.loginCont}>
         <Formik
@@ -122,39 +127,6 @@ const login = () => {
           )}
         </Formik>
 
-        {/* <Text style={Styles.labelText}>Email</Text>
-        <TextInput 
-        value={userData.email}
-        onChangeText={(text)=>handleChange(text, "email")}
-        style={Styles.input}
-        />
-
-        <Text style={Styles.errorTxt}>{errors.emailErr}</Text>
-
-        <Text style={Styles.labelText}>Password</Text>
-        <TextInput 
-        value={userData.password}
-        onChangeText={(text)=>handleChange(text, "password")}
-        secureTextEntry={ispassVisible ? false : true}
-        style={Styles.input}
-        />
-        <Text style={Styles.errorTxt}>{errors.passErr}</Text>
-        {
-          ispassVisible ? 
-          <EyeOff
-           color={'#fff'}
-           size={20}
-           onPress={()=>setisPassVisble((prev)=>!prev)}
-           style={Styles.eye}
-           /> : 
-           <Eye 
-           color={'#fff'}
-           size={20}
-           onPress={()=>setisPassVisble((prev)=>!prev)}
-           style={Styles.eye}
-           />
-        } */}
-
         {/* sign up button */}
         <TouchableOpacity onPress={() => router.push("/signup")} style={{marginTop: 10, alignItems: 'center'}}>
           <Text style={Styles.signUpText}>Don't Have an account? sign up</Text>
@@ -166,7 +138,7 @@ const login = () => {
       </View>
 
       {/* login button */}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
