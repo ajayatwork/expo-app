@@ -52,7 +52,7 @@ const login = () => {
       await AsyncStorage.setItem("token", res?.data?.data?.token)
     } catch (error) {
       if (axios.isAxiosError(error)) {
-      catchError(error.response?.data?.message);
+      catchError(error.response?.data?.errors);
     } 
     }finally{
       setisLoading(false);
