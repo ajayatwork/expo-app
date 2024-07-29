@@ -11,14 +11,17 @@ const Home = () => {
   const [featuredProducts, setfeaturedProducts] = useState([]);
   const [allProducts, setallProducts] = useState([]);
   const [showLoading ,setshowLoading] = useState(false);
+  const [isLoading ,setisLoading] = useState(false);
   const [limit, setLimit] = useState(10);
   const getAllProds = async ()=>{
     try {
+      setisLoading(true);
       const res = await getAllProducts(limit);
       setallProducts(res?.data?.products);
     } catch (error) {
     }finally{
       setshowLoading(false);
+      setisLoading(false);
     }
   }
   useFocusEffect(useCallback(()=>{
@@ -35,11 +38,15 @@ const Home = () => {
     getAllProds();
   },[]))
 
-  useEffect(()=>{
-    getAllProds();
-  }, [limit])
+useEffect(() => {
+  const fetchData = async () => {
+    await getAllProds();
+    setshowLoading(false);
+  };
+  fetchData();
+}, [limit]);
   // check whether we are at the end of the flatlist if so update the limit and call the api
-  const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+  const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}:any) => {
   const paddingToBottom = 20;
   let ans =  layoutMeasurement.height + contentOffset.y >=
     contentSize.height - paddingToBottom;
@@ -58,10 +65,11 @@ const Home = () => {
       }
     }}
     scrollEventThrottle={100}
+    scrollEnabled={isLoading ? false : true}
     >
     <View style={{alignItems: "flex-start"}}>
-      <CustomCarousel title='Top Products this week' products={featuredProducts}/>
-      {allProducts.length > 0 && <VerticalProducts title={"For you"} productsData={allProducts}/>}
+      <CustomCarousel title='Top Products this week' products={featuredProducts} isLoading={isLoading}/>
+      {allProducts.length > 0 && <VerticalProducts title={"For you"} productsData={allProducts} isLoading={isLoading}/>}
       {
         showLoading && <ActivityIndicator animating={true} size={'large'} color='#6D28D9' style={{justifyContent: "center"}}/>
       }

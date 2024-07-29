@@ -117,6 +117,8 @@ const CustomDrawer = (props: any) => {
           </Text>
         </View>
       </View>
+
+
       <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: "#ccc" }}>
         <TouchableOpacity onPress={shareApp} style={{ paddingVertical: 15 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>

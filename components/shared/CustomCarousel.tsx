@@ -3,9 +3,11 @@ import React from "react";
 
 // added imports
 import Carousel from "react-native-reanimated-carousel";
+import SkeletonPlaceholder from "expo-react-native-skeleton-placeholder";
 type Props = {
   title: string;
   products: any;
+  isLoading: boolean
 };
 
 const SLIDER_WIDTH = Dimensions.get("window").width;
@@ -31,7 +33,7 @@ const renderItem = ({ item, index }) => {
   );
 };
 
-const CustomCarousel = ({ title, products }: Props) => {
+const CustomCarousel = ({ title, products, isLoading }: Props) => {
   return (
     <>
       <Text
@@ -39,7 +41,8 @@ const CustomCarousel = ({ title, products }: Props) => {
       >
         {title}
       </Text>
-      <Carousel
+      {
+        isLoading ? <CaraouselLoader /> :   <Carousel
         loop
         width={SLIDER_WIDTH - 20}
         height={250}
@@ -49,7 +52,15 @@ const CustomCarousel = ({ title, products }: Props) => {
         scrollAnimationDuration={2500}
         style={{ marginHorizontal: "auto" }}
       />
+      }
     </>
+  );
+};
+const CaraouselLoader = () => {
+  return (
+    <SkeletonPlaceholder borderRadius={10} speed={800} backgroundColor="#E0E0E0" highlightColor="#F5F5F5" shimmerWidth={80}>
+      <View style={{ width: SLIDER_WIDTH-50, height: 180, marginHorizontal: 18 }} />
+    </SkeletonPlaceholder>
   );
 };
 

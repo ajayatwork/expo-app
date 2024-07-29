@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, FlatList, Image, Pressable } from "react-native
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { DollarSign, Heart, Star } from "lucide-react-native";
 import { router, useNavigation } from "expo-router";
+import SkeletonPlaceholder from "expo-react-native-skeleton-placeholder";
 type Props = {
   title: string;
   productsData: {
@@ -11,9 +12,10 @@ type Props = {
     discount: string | number;
     ratings: string | number;
   }[];
+  isLoading: boolean
 };
 
-const renderItems = (item: any, index: number, color:boolean, setColor:Dispatch<SetStateAction<boolean>>, navigation:any) => {
+const renderItems = (item: any, index: number, color:boolean, setColor:Dispatch<SetStateAction<boolean>>) => {
   return (
     <Pressable style={Styles.productCont}>
     <View key={index}>
@@ -31,7 +33,7 @@ const renderItems = (item: any, index: number, color:boolean, setColor:Dispatch<
         resizeMode="contain"
       />
       <Pressable onPress={()=>router.push({
-        pathname: `/(home)/product-detail/${item?.id}` 
+        pathname: `/product-detail/${item?.id}`
     })}>
       <View style={{ marginLeft: 10 }}>
         <Text style={{ fontWeight: "600", textShadowRadius: 1, fontFamily: "Poppins_400Regular" }}>
@@ -55,20 +57,36 @@ const renderItems = (item: any, index: number, color:boolean, setColor:Dispatch<
 };
 
 
-const VerticalProducts = ({ title, productsData }: Props) => {
-  const navigation = useNavigation();
+const VerticalProducts = ({ title, productsData, isLoading }: Props) => {
   const [color, setColor] = useState(false);
   return (
     <>
       <Text style={Styles.title}>{title}</Text>
-      <FlatList
+     {
+      isLoading ? <Skeleton /> :  <FlatList
         columnWrapperStyle={{ justifyContent: "space-between" }}
         data={productsData}
-        renderItem={({ item, index }) => renderItems(item, index, color, setColor, navigation)}
+        renderItem={({ item, index }) => renderItems(item, index, color, setColor)}
         showsVerticalScrollIndicator={false}
         numColumns={2}
       />
+     }
     </>
+  );
+};
+
+
+const Skeleton = () => {
+  const items:any = Array(4).fill(0); // Create an array with 8 elements
+  return (
+    <SkeletonPlaceholder borderRadius={10} speed={1500} backgroundColor="#E0E0E0" highlightColor="#F5F5F5">
+      {items.map((i:any, index:number) => (
+        <View key={index} style={{flexDirection: 'row', alignItems: 'center', gap: 25, justifyContent: "flex-start", marginHorizontal: 15, marginBottom: 20}}>
+          <View style={{width: "45%", height: 350}} />
+          <View style={{width: "45%", height: 350}} />
+        </View>
+      ))}
+    </SkeletonPlaceholder>
   );
 };
 

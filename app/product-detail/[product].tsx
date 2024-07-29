@@ -1,5 +1,4 @@
-import { StyleSheet, Text, View, Image, ScrollView, Touchable, TouchableOpacity, Pressable } from 'react-native';
-import { ViewProps, ScrollViewProps, ImageSourcePropType } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { getSingleProduct } from '@/utils/products';
@@ -8,6 +7,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { FontAwesome } from '@expo/vector-icons';
 import { ShoppingCart } from 'lucide-react-native';
 import QrModal from '@/components/shared/qr-modal';
+import SkeletonPlaceholder from 'expo-react-native-skeleton-placeholder';
 interface Product {
   thumbnail: string;
   returnPolicy: string;
@@ -19,39 +19,45 @@ interface Product {
   description: string;
 }[]
 
+
 interface ProductDetailProps {
   singleProduct: Product;
 }
 const ProductDetail =()=> {
-    useEffect(()=>{
-     navigation.setOptions({ 
-      headerShown: true,
-      headerTitle: singleProduct.title 
-    });
-  },[])
   const { product } = useLocalSearchParams();
   const navigation = useNavigation();
   const [singleProduct, setSingleProduct] = useState({});
   const [showQrModal, setshowQrModal] = useState(false); 
+  const [isLoading, setisLoading] = useState(false);
   useFocusEffect(
     useCallback(() => {
-      (async function getDetails() {
-        try {
-          const res = await getSingleProduct(product);
-          setSingleProduct(res?.data)
-          console.log(res?.data)
-        } catch (error) {
-          console.error(error);
-        } finally {
-          // Add any final logic here
-        }
-      })();
-    }, [product])
+      if (singleProduct) {
+        navigation.setOptions({ 
+          headerShown: true,
+          headerTitle: singleProduct.title 
+        });
+      }
+    }, [singleProduct, navigation])
   );
 
+  useEffect(() => {
+    (async function getDetails() {
+      try {
+        setisLoading(true);
+        const res = await getSingleProduct(product);
+        setSingleProduct(res?.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setisLoading(false);
+      }
+    })();
+  }, [product]);
 
   return (
     <>
+    {
+      isLoading ? <SkeletonLoader /> :  <>
      <View style={styles.container}>
     <Image style={styles.image} source={{uri: singleProduct?.thumbnail}}/>
     <View style={styles.returnPolicy}>
@@ -61,7 +67,7 @@ const ProductDetail =()=> {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{marginLeft: 15, padding: 5}}>
       {/* all other information */}
       <View>
-        <ThemedText type='title' style={{fontWeight: "500"}}>{singleProduct.title}</ThemedText>
+        <ThemedText type='title' style={{fontWeight: "500", marginTop: 15}}>{singleProduct.title}</ThemedText>
  
         {/* ratings and all */}
         <View style={{flexDirection: "row"}}>
@@ -115,9 +121,26 @@ const ProductDetail =()=> {
       }
     </ScrollView>
     </>
+    }
+    </>
   );
 };
 
+
+const SkeletonLoader = ()=>{
+  return(
+    <SkeletonPlaceholder borderRadius={10} speed={1500} backgroundColor="#E0E0E0" highlightColor="#F5F5F5">
+      <>
+      <View style={{ width: "95%", height: 420, marginHorizontal: "auto", borderTopEndRadius: 10, borderBottomRightRadius: 10, marginVertical: 10 }} />
+        <SkeletonPlaceholder.Item marginLeft={20}>
+        </SkeletonPlaceholder.Item>
+         <SkeletonPlaceholder.Item width={320} height={20} marginTop={0} marginLeft={15}/>
+          <SkeletonPlaceholder.Item marginTop={6} width={60} height={20} marginLeft={15}/>
+          <SkeletonPlaceholder.Item marginTop={120} width={120} height={40} marginHorizontal={'auto'}/>
+      </>
+    </SkeletonPlaceholder>
+  )
+} 
 export default ProductDetail;
 
 const styles = StyleSheet.create({
