@@ -22,7 +22,8 @@ import {
   HindSiliguri_700Bold,
 } from '@expo-google-fonts/hind-siliguri';
 
-import { ActivityIndicator } from "react-native-paper";
+import {store} from "@/redux/store"
+import { Provider } from "react-redux";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -86,6 +87,7 @@ export default function RootLayout() {
   }
   if(!isFontLoaded) return null;
   return (
+    <Provider store={store}>
       <ToastProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -93,5 +95,6 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" />
       </Stack>
       </ToastProvider>
+      </Provider>
   );
 }

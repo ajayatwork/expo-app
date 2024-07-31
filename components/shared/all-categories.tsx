@@ -1,6 +1,9 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import {getProductsFromCategory} from "@/utils/products"
+import { useDispatch, useSelector } from "react-redux";
+import {getProducts} from '@/redux/productSlice/productsSlice'
+import { RootState } from "@/redux/store";
 type Category = {
   text: string;
 };
@@ -10,26 +13,31 @@ type CatProp = {
 };
 
 export default function AllCategories({ allCategories }: CatProp) {
-  const [active, setActive] = useState("All");
-
-  // Create a new array including "All" without mutating the original array
+  const [activeCat, setactiveCat] = useState("All");
   const categoriesWithAll = ["All", ...allCategories];
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    (async function getData(){
+      const res = await getProductsFromCategory(activeCat);
+      dispatch(getProducts(res?.data?.products))
+    })();
+  }, [activeCat])
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ marginTop: 20 }}
+      contentContainerStyle={{ marginVertical: 20 }}
     >
       {categoriesWithAll.length > 0 &&
         categoriesWithAll.slice(0, 8).map((item:any, ind) => (
-          <TouchableOpacity key={ind} onPress={() => setActive(item)}>
+          <TouchableOpacity key={ind} onPress={() => setactiveCat(item)}>
             <View
               style={[
                 styles.container,
-                active === item && {backgroundColor: "#19c563"}
+                activeCat === item && {backgroundColor: "#19c563"}
               ]}
             >
-              <Text style={[styles.cat,  active === item && {color: "#fff"}]}>{item}</Text>
+              <Text style={[styles.cat,  activeCat === item && {color: "#fff"}]}>{item}</Text>
             </View>
           </TouchableOpacity>
         ))}

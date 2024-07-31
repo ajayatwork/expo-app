@@ -19,3 +19,11 @@ export const getAllCategories = async()=>{
     const res = await axios.get(`https://dummyjson.com/products/category-list`);
     return res;
 }
+
+export const getProductsFromCategory = async (category)=>{
+    const res =
+      category !== "All"
+        ? await axios.get(`https://dummyjson.com/products/category/${category}`)
+        : getAllProducts(10);
+    return res;
+}
