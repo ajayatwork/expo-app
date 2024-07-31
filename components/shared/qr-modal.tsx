@@ -3,7 +3,7 @@ import React, { Dispatch, SetStateAction } from 'react'
 import { CrossIcon, X } from 'lucide-react-native'
 
 type Props = {
-    qrcode: string,
+    qrcode: string | undefined,
     showQr: boolean,
     setshowQr: Dispatch<SetStateAction<boolean>>
 }

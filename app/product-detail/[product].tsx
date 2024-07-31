@@ -8,15 +8,20 @@ import { FontAwesome } from '@expo/vector-icons';
 import { ShoppingCart } from 'lucide-react-native';
 import QrModal from '@/components/shared/qr-modal';
 import SkeletonPlaceholder from 'expo-react-native-skeleton-placeholder';
+import { FadeInLeft, FadeOutRight } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 interface Product {
-  thumbnail: string;
-  returnPolicy: string;
-  title: string;
-  rating: number;
-  reviews: { length: number }[];
-  tags: string[];
-  price: number;
-  description: string;
+  thumbnail?: string;
+  returnPolicy?: string;
+  title?: string;
+  rating?: number;
+  reviews?: { length: number }[];
+  tags?: string[];
+  price?: number;
+  description?: string;
+  meta?:{
+    qrCode?:string
+  }
 }[]
 
 
@@ -26,7 +31,7 @@ interface ProductDetailProps {
 const ProductDetail =()=> {
   const { product } = useLocalSearchParams();
   const navigation = useNavigation();
-  const [singleProduct, setSingleProduct] = useState({});
+  const [singleProduct, setSingleProduct] = useState<Product>({});
   const [showQrModal, setshowQrModal] = useState(false); 
   const [isLoading, setisLoading] = useState(false);
   useFocusEffect(
@@ -34,7 +39,7 @@ const ProductDetail =()=> {
       if (singleProduct) {
         navigation.setOptions({ 
           headerShown: true,
-          headerTitle: singleProduct.title 
+          headerTitle: singleProduct?.title 
         });
       }
     }, [singleProduct, navigation])
@@ -58,12 +63,12 @@ const ProductDetail =()=> {
     <>
     {
       isLoading ? <SkeletonLoader /> :  <>
-     <View style={styles.container}>
+     <Animated.View entering={FadeInLeft} exiting={FadeOutRight} style={styles.container}>
     <Image style={styles.image} source={{uri: singleProduct?.thumbnail}}/>
     <View style={styles.returnPolicy}>
       <Text style={{fontSize: 12, color:"#fff"}}>{singleProduct?.returnPolicy}</Text>
     </View>
-    </View>
+    </Animated.View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{marginLeft: 15, padding: 5}}>
       {/* all other information */}
       <View>

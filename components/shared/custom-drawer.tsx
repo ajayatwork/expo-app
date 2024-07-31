@@ -15,7 +15,7 @@ import {
 import { Switch } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 const CustomDrawer = (props: any) => {
   const handleLogout = () => {
     Alert.alert(
@@ -87,7 +87,7 @@ const CustomDrawer = (props: any) => {
               fontFamily: "Poppins_600SemiBold"
             }}
           >
-            Mr. Deadpool
+          Mr. Deadpool
           </Text>
         </ImageBackground>
         <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 10 }}>

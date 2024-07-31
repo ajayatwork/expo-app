@@ -48,7 +48,7 @@ const login = () => {
       // call api
       let res = await loginToApi(values);
       showsuccesToast(res?.data?.message);
-      router.replace("/(home)");
+      router.replace("tabs");
       await AsyncStorage.setItem("token", res?.data?.data?.token)
     } catch (error) {
       if (axios.isAxiosError(error)) {

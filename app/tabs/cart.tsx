@@ -1,12 +1,14 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const ChangePassword = () => {
+type Props = {}
+
+const Cart = (props: Props) => {
   return (
     <View>
-      <Text>Change Password</Text>
+      <Text>Cart</Text>
     </View>
   )
 }
 
-export default ChangePassword
+export default Cart

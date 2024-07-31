@@ -71,7 +71,7 @@ export default function RootLayout() {
         if (data!=null || data!="") {
           setIsLoggedIn(true);
           setUserToken(data);
-          router.replace("/(home)")
+          router.replace("tabs")
         }
       } catch (error) {
         console.error("Failed to fetch the token from AsyncStorage", error);
@@ -92,6 +92,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(home)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{headerShown: false}} />
         <Stack.Screen name="+not-found" />
       </Stack>
       </ToastProvider>

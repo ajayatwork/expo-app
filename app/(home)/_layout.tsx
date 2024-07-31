@@ -6,7 +6,7 @@ export default function HomeLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer drawerContent={(props)=> <CustomDrawer {...props}/>}>
         <Drawer.Screen
-          name="index"
+          name="(tabs)/index"
           options={{
             drawerLabel: 'Home',
             title: 'Home'
