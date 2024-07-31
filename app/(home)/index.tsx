@@ -7,6 +7,8 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import {getProducts, getAllProducts, getAllCategories} from '@/utils/products'
 import VerticalProducts from '@/components/shared/VerticalProducts';
 import AllCategories from '@/components/shared/all-categories';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 const Home = () => {
   const [featuredProducts, setfeaturedProducts] = useState([]);
   const [allCategories, setallCategories] = useState([]);
@@ -14,6 +16,9 @@ const Home = () => {
   const [showLoading ,setshowLoading] = useState(false);
   const [isLoading ,setisLoading] = useState(false);
   const [limit, setLimit] = useState(10);
+
+  const filteredProducts = useSelector((state:RootState)=>state.product.items);
+  console.log("MY FILTER PRODUCTSSS", filteredProducts);
   const getAllProds = async ()=>{
     try {
       setisLoading(true);
@@ -92,7 +97,7 @@ useEffect(() => {
       {/* all categories */}
 
       <AllCategories allCategories={allCategories}/>
-      {allProducts.length > 0 && <VerticalProducts title={"For you"} productsData={allProducts} isLoading={isLoading}/>}
+      {allProducts.length > 0 && <VerticalProducts title={"For you"} productsData={filteredProducts} isLoading={isLoading}/>}
       {
         showLoading && <ActivityIndicator animating={true} size={'large'} color='#6D28D9' style={{justifyContent: "center"}}/>
       }
