@@ -1,8 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import CountryPicker from 'react-native-country-picker-modal';
 import { getProfile, updateProfile } from '@/utils/profile';
 import { TextInput, Button, Text, Avatar } from 'react-native-paper';
 import { Formik } from 'formik';
@@ -10,6 +9,7 @@ import * as Yup from 'yup';
 import * as ImagePicker from 'expo-image-picker';
 import { useCustomToast } from "@/hooks/useCustomToast";
 import Entypo from '@expo/vector-icons/Entypo';
+import PhoneInput from 'react-native-phone-number-input';
 const validationSchema = Yup.object().shape({
   first_name: Yup.string().required('First name is required'),
   last_name: Yup.string().required('Last name is required'),
@@ -19,7 +19,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const EditProfileScreen = () => {
-   const [profileData, setProfileData] = useState({
+  const [profileData, setProfileData] = useState({
     profile_pic: '',
     first_name: '',
     last_name: '',
@@ -30,31 +30,12 @@ const EditProfileScreen = () => {
     address: ''
   });
   const navigation = useNavigation();
-  const [countryCode, setCountryCode] = useState<any>(profileData.country_code);
-  const [country, setCountry] = useState<any>(null);
-   const { catchError, showsuccesToast } = useCustomToast();
-  const [withCountryNameButton, setWithCountryNameButton] =
-    useState<boolean>(false);
-  const [withFlag, setWithFlag] = useState<boolean>(true);
-  const [withEmoji, setWithEmoji] = useState<boolean>(true);
-  const [withFilter, setWithFilter] = useState<boolean>(true);
-  const [withAlphaFilter, setWithAlphaFilter] = useState<boolean>(false);
-  const [withCallingCode, setWithCallingCode] = useState<boolean>(true);
+  const { catchError, showsuccesToast } = useCustomToast();
+  const [value, setValue] = useState("");
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  const [isCountryPickerVisible, setCountryPickerVisible] = useState(false);
   const [isNewPic, setisNewPic] = useState(false);
   const [isLoading, setisLoading] = useState<boolean>(false);
-    const onSelect = (country: any) => {
-    setCountryCode(country.cca2);
-    setCountry(country);
-  };
-
-
- const formatDate = (date: Date | null) => {
-    if (!date) return "";
-    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-  };
-
+  const phoneInput = useRef<PhoneInput>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -62,17 +43,20 @@ const EditProfileScreen = () => {
         const res = await getProfile();
         const profile = res?.data?.data;
         if (profile) {
-          console.log("prifle", profile);
           setProfileData({
             ...profile,
-            dob: new Date(profile.dob)
+            dob: new Date(profile.dob),
+            country_code: profile.country_code,
+            phone_number: profile.phone_number
           });
+          setValue(res?.data?.data?.phone_number);
         }
       })();
+      console.log("profile", profileData);
     }, [])
   );
 
-  const handleImageSelect = async (fieldVal:any)=>{
+  const handleImageSelect = async (fieldVal: any) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: false,
@@ -81,36 +65,28 @@ const EditProfileScreen = () => {
     });
 
     console.log(result);
-
     if (!result.canceled) {
-      fieldVal("profile_pic", result.assets[0].uri);
+      fieldVal("profile_pic", bufferr_img);
       setisNewPic(true);
     }
   }
 
-  const handleSave = async (values:any) => {
-    console.log("VALUESSS", values)
-    for(const Key in values){
-      if(values[Key]!=profileData[Key]){
-        console.log("THESE VALUES ARE DIFFF", values[Key])
-      }
-    }
+  const handleSave = async (values: any) => {
     const updatedProfile = {
       ...values,
-      dob: profileData.dob.toISOString(),
-      country_code: profileData.country_code,
+      dob: profileData.dob,
     };
     try {
       setisLoading(true);
       const res = await updateProfile(updatedProfile);
-      console.log("RESSSS", res);
-      if(res?.status){
+      console.log("RESadasdasas342545", res);
+      if (res?.status) {
         showsuccesToast(res?.data?.message);
         router.replace("/(Profile)")
       }
     } catch (error) {
-      console.log("Error is error",error);
-    }finally{
+      console.log("Error is error", error);
+    } finally {
       setisLoading(false);
     }
   };
@@ -119,20 +95,20 @@ const EditProfileScreen = () => {
     <Formik
       initialValues={profileData}
       validationSchema={validationSchema}
-      onSubmit={(values)=>handleSave(values)}
+      onSubmit={(values) => handleSave(values)}
       enableReinitialize
     >
       {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
         <View style={styles.container}>
-          <Entypo name="chevron-small-left" size={35} color="black" onPress={()=>navigation.goBack()}/>
-          <TouchableOpacity onPress={()=>handleImageSelect(setFieldValue)}>
+          <Entypo name="chevron-small-left" size={35} color="black" onPress={() => navigation.goBack()} />
+          <TouchableOpacity onPress={() => handleImageSelect(setFieldValue)}>
             {values.profile_pic ? (
-            <Avatar.Image size={200} source={{ uri: !isNewPic ? `http://nodemaster.visionvivante.com:4040/${profileData.profile_pic}` : values.profile_pic }} style={styles.avatar}/>
-          ) : (
-            <View style={styles.placeholderAvatar}>
-              <Text style={styles.placeholderText}>{values?.first_name?.charAt(0)}</Text>
-            </View>
-          )}
+              <Avatar.Image size={200} source={{ uri: !isNewPic ? `http://nodemaster.visionvivante.com:4040/${profileData.profile_pic}` : values.profile_pic }} style={styles.avatar} />
+            ) : (
+              <View style={styles.placeholderAvatar}>
+                <Text style={styles.placeholderText}>{values?.first_name?.charAt(0)}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TextInput
             label="First Name"
@@ -173,7 +149,7 @@ const EditProfileScreen = () => {
           <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
             <TextInput
               label="DOB"
-              value={values.dob.toDateString()}
+              value={values.dob ? values.dob.toDateString() : ''}
               editable={false}
               style={styles.input}
               mode="outlined"
@@ -181,44 +157,34 @@ const EditProfileScreen = () => {
           </TouchableOpacity>
           <DateTimePickerModal
             isVisible={isDatePickerVisible}
-            date={values.dob}
+            date={profileData.dob}
             onConfirm={(date) => {
-              formatDate(date)
               setDatePickerVisible(false);
               setFieldValue('dob', date);
+              setProfileData(prev => ({ ...prev, dob: date }));
             }}
             onCancel={() => {
               setDatePickerVisible(false);
             }}
           />
-         <View>
-           <CountryPicker
-            visible={isCountryPickerVisible}
-           {...{
-                  countryCode,
-                  withFilter,
-                  withFlag,
-                  withCountryNameButton,
-                  withAlphaFilter,
-                  withCallingCode,
-                  withEmoji,
-                  onSelect,
-                }}
-           countryCode={values.country_code}
-          />
-          <TextInput
-            label="Phone Number"
-            value={values?.phone_number.toString()}
-            onChangeText={handleChange('phone_number')}
-            onBlur={handleBlur('phone_number')}
-            style={styles.input}
-            mode="outlined"
-            error={touched.phone_number && errors.phone_number}
+         <PhoneInput
+            ref={phoneInput}
+            defaultValue={value}
+            defaultCode='IN'
+            layout="first"
+            onChangeText={(text) => {
+              handleChange("phone_number")("phone_number")
+              setFieldValue("phone_number", text, true);
+            }}
+            onChangeCountry={(country)=>{
+              setFieldValue("country_code",country?.callingCode[0]);
+            }}
+            containerStyle={[styles.input, {backgroundColor: "#fff", borderWidth: 0.6, width: "100%", borderRadius: 5}]}
+            countryPickerButtonStyle={{width: "15%"}}
           />
           {touched.phone_number && errors.phone_number && (
             <Text style={styles.errorText}>{errors.phone_number}</Text>
           )}
-         </View>
           <TextInput
             label="Address"
             value={values.address}
@@ -231,13 +197,13 @@ const EditProfileScreen = () => {
           {touched.address && errors.address && (
             <Text style={styles.errorText}>{errors.address}</Text>
           )}
-          <Button 
-          mode="contained"
-           onPress={()=>handleSubmit()} 
-           style={styles.button}
-           loading={isLoading}
-           disabled={isLoading}
-           >
+          <Button
+            mode="contained"
+            onPress={() => handleSubmit()}
+            style={styles.button}
+            loading={isLoading}
+            disabled={isLoading}
+          >
             Save
           </Button>
         </View>
@@ -269,7 +235,7 @@ const styles = StyleSheet.create({
   placeholderAvatar: {
     width: 200,
     height: 200,
-    borderRadius:100,
+    borderRadius: 100,
     backgroundColor: 'gray',
     justifyContent: 'center',
     alignItems: 'center',

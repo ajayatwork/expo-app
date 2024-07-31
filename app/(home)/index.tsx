@@ -1,14 +1,15 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, Button } from 'react-native-paper';
 import CustomCarousel from '@/components/shared/CustomCarousel';
-
-import {getProducts, getAllProducts} from '@/utils/products'
+import AntDesign from '@expo/vector-icons/AntDesign';
+import {getProducts, getAllProducts, getAllCategories} from '@/utils/products'
 import VerticalProducts from '@/components/shared/VerticalProducts';
+import AllCategories from '@/components/shared/all-categories';
 const Home = () => {
   const [featuredProducts, setfeaturedProducts] = useState([]);
+  const [allCategories, setallCategories] = useState([]);
   const [allProducts, setallProducts] = useState([]);
   const [showLoading ,setshowLoading] = useState(false);
   const [isLoading ,setisLoading] = useState(false);
@@ -33,6 +34,15 @@ const Home = () => {
         }
       } catch (error) {
         
+      }
+    })();
+    (async function getAllCat(){
+      try {
+        const res = await getAllCategories();
+        console.log("CATGGG", res?.data);
+        setallCategories(res?.data);
+      } catch (error) {
+        console.log("ER", error);
       }
     })();
     getAllProds();
@@ -69,6 +79,19 @@ useEffect(() => {
     >
     <View style={{alignItems: "flex-start"}}>
       <CustomCarousel title='Top Products this week' products={featuredProducts} isLoading={isLoading}/>
+
+      {/* sub heading category */}
+      <View style={{width: "100%", flexDirection: 'row', justifyContent: "space-between"}}>
+        <Text style={[Styles.subHeading,{marginHorizontal: 10, fontSize: 19}]}>Categories</Text>
+       <View style={{flexDirection: 'row', justifyContent: "flex-end", alignItems: "center", marginRight: 10}}>
+         <Text style={[Styles.subHeading,{color: "rgb(25, 197, 99)"}]}>All</Text>
+        <AntDesign name="right" size={20} color="rgb(25, 197, 99)" />
+       </View>
+      </View>
+
+      {/* all categories */}
+
+      <AllCategories allCategories={allCategories}/>
       {allProducts.length > 0 && <VerticalProducts title={"For you"} productsData={allProducts} isLoading={isLoading}/>}
       {
         showLoading && <ActivityIndicator animating={true} size={'large'} color='#6D28D9' style={{justifyContent: "center"}}/>
@@ -83,7 +106,11 @@ const Styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: 30
-  }
+  },
+  subHeading:{
+    fontFamily: "Poppins_500Medium",
+    fontSize: 15
+  },
 })
 
 export default Home

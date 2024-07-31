@@ -2,11 +2,8 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
-  ScrollView,
-  KeyboardAvoidingView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useRouter } from "expo-router";
 import * as Yup from "yup";
@@ -14,43 +11,31 @@ import { Formik } from "formik";
 import { TextInput, Button } from "react-native-paper";
 import { signupApi } from "@/utils/signup";
 import { useCustomToast } from "@/hooks/useCustomToast";
-import CountryPicker, { DARK_THEME } from 'react-native-country-picker-modal'
-import axios from "axios";
+import PhoneInput from "react-native-phone-number-input";
 const SignUp = () => {
   const router = useRouter();
   const { catchError, showsuccesToast } = useCustomToast();
   const [isLoading, setisLoading] = useState(false);
   const [isDateVisible, setisDateVisible] = useState(false);
-  const [showcpModal, setshowcpModal] = useState(false);
   const [isPassVisible, setisPassVisible] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState<any>("IN");
+  const [countryCode, setCountryCode] = useState<any>("91");
+  const phoneInput = useRef<PhoneInput>(null);
   const [country, setCountry] = useState<any>(null);
-  const [withCountryNameButton, setWithCountryNameButton] =
-    useState<boolean>(false);
-  const [withFlag, setWithFlag] = useState<boolean>(true);
-  const [withEmoji, setWithEmoji] = useState<boolean>(true);
-  const [withFilter, setWithFilter] = useState<boolean>(true);
-  const [withAlphaFilter, setWithAlphaFilter] = useState<boolean>(false);
-  const [withCallingCode, setWithCallingCode] = useState<boolean>(true);
-  const onSelect = (country: any) => {
-    console.log("Country", country);
-    setCountryCode(country.cca2);
-    setCountry(country);
-  };
 
   const signUpSchema = Yup.object().shape({
     email: Yup.string()
       .email("Email address is invalid")
       .required("Email address is required"),
     password: Yup.string()
-      .min(8, (min) => `Password must contain at least ${min} characters`)
+      .min(8, (min) => `Password must contain at least 8 characters`)
       .required("Password is required*"),
     firstName: Yup.string().required("First name is required*"),
     lastName: Yup.string().required("Last name is required*"),
     dob: Yup.string().required("Date of birth is required"),
     phoneNo: Yup.string()
-      .min(8, (min) => `Phone Number must have ${min} digits`)
-      .required("Phone Number is required*"),
+      .min(8, (min) => `  Number must have 10 digits`)
+      .required("Phone Number is required*")
+      .matches(/^[0-9]{10}$/, 'Phone number is not valid'),
     address: Yup.string().required("Address is required*"),
     countryCode: Yup.string().default("91"),
   });
@@ -60,11 +45,12 @@ const SignUp = () => {
     try {
       setisLoading(true);
       // call api;
-      const res = await signupApi(userData, country);
+      const res = await signupApi(userData);
       showsuccesToast(res?.data?.message);
       router.replace("/(auth)");
     } catch (error) {
-        error && catchError(error?.response.data.message);
+        console.log("errr", error);
+        error && catchError(error?.response?.data?.errors);
     } finally {
       setisLoading(false);
     }
@@ -72,7 +58,6 @@ const SignUp = () => {
 
   const formatDate = (date: Date | null) => {
     if (!date) return "";
-    console.log("DATAEEAESASDDS", date);
     return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   };
 
@@ -172,7 +157,7 @@ const SignUp = () => {
             <TextInput
               mode="outlined"
               placeholder="DD-MM-YYYY"
-              value={formatDate(values.dob)}
+              value={values.dob.toDateString()}
               editable={false}
               left={<TextInput.Icon icon="calendar" onPress={()=>setisDateVisible(true)}/>}
               style={Styles.input}
@@ -181,8 +166,7 @@ const SignUp = () => {
               isVisible={isDateVisible}
               mode="date"
               onConfirm={(date) => {
-                formatDate(date);
-                setFieldValue("dob", date);
+                setFieldValue("dob",date);
                 setisDateVisible(false);
               }}
               onCancel={() => setisDateVisible(false)}
@@ -190,31 +174,22 @@ const SignUp = () => {
             {touched.dob && errors.dob && (
               <Text style={Styles.errorTxt}>{errors.dob}</Text>
             )}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <CountryPicker
-                {...{
-                  countryCode,
-                  withFilter,
-                  withFlag,
-                  withCountryNameButton,
-                  withAlphaFilter,
-                  withCallingCode,
-                  withEmoji,
-                  onSelect,
-                }}
-                visible={showcpModal}
-                containerButtonStyle={{marginTop: 15, borderWidth: 0.8, borderColor: "#808080", marginRight: 15, paddingHorizontal: "auto", height: 40, justifyContent: 'center', alignItems: 'center', borderRadius: 4}}
-              />
-              <TextInput
-                label="Phone Number"
-                mode="outlined"
-                style={[Styles.input, { width: "80%" }]}
-                onChangeText={handleChange("phoneNo")}
-                onBlur={handleBlur("phoneNo")}
-                value={values.phoneNo}
-                error={touched.phoneNo && errors.phoneNo ? true : false}
-              />
-            </View>
+            <PhoneInput
+            ref={phoneInput}
+            defaultValue={values.countryCode}
+            defaultCode="IN"
+            layout="first"
+            onChangeText={(text) => {
+              handleChange("phoneNo")("phoneNo")
+              setFieldValue("phoneNo", text, true);
+            }}
+            onChangeCountry={(country)=>{
+              setFieldValue("countryCode", (country?.callingCode[0] || "91"));
+            }}
+            containerStyle={[Styles.input, {backgroundColor: "#fff"}]}
+            countryPickerButtonStyle={{width: "15%"}}
+            
+          />
             {touched.phoneNo && errors.phoneNo && (
               <Text style={Styles.errorTxt}>{errors.phoneNo}</Text>
             )}
