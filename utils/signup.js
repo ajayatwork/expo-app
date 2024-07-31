@@ -1,5 +1,5 @@
 import { request } from "../utils/index";
-export const signupApi = async (userData, country) => {
+export const signupApi = async (userData) => {
   const response = await request({
     path: "auth/signup",
     method: "POST",
@@ -7,11 +7,11 @@ export const signupApi = async (userData, country) => {
       email: userData.email.toLowerCase(),
       password: userData.password,
       first_name: userData.firstName,
-      last_name: userData.last_name,
+      last_name: userData.lastName,
       dob: userData.dob,
       phone_number: userData.phoneNo,
       address: userData.address,
-      country_code: country.callingCode[0],
+      country_code: userData.countryCode,
     },
   });
   return response;

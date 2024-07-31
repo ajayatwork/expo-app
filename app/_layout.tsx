@@ -66,14 +66,15 @@ export default function RootLayout() {
     const checkUserLoggedIn = async () => {
       try {
         const data = await AsyncStorage.getItem("token");
-        if (data) {
-          console.log("Data2143", data);
+        console.log("data", data);
+        if (data!=null || data!="") {
           setIsLoggedIn(true);
           setUserToken(data);
           router.replace("/(home)")
         }
       } catch (error) {
         console.error("Failed to fetch the token from AsyncStorage", error);
+        router.replace("/signup")
       }
     };
 
@@ -87,8 +88,8 @@ export default function RootLayout() {
   return (
       <ToastProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        {isLoggedIn ?   <Stack.Screen name="(home)" options={{ headerShown: false }} />
-         : <Stack.Screen name="(auth)" options={{ headerShown: false }} />}
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(home)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       </ToastProvider>

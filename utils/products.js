@@ -14,3 +14,8 @@ export const getSingleProduct = async (id)=>{
     const res = await axios.get(`https://dummyjson.com/products/${id}`);
     return res;
 }
+
+export const getAllCategories = async()=>{
+    const res = await axios.get(`https://dummyjson.com/products/category-list`);
+    return res;
+}
